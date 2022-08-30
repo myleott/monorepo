@@ -5,9 +5,12 @@ from importlib import util
 from pathlib import Path
 
 
-def load_package(package):
-    # Find `.monorepo_root` relative to the importing code.
-    root = importer = Path(inspect.stack()[1].filename).resolve()
+def load_package(package, root:str = None):
+    if not root:
+        # Find `.monorepo_root` relative to the importing code.
+        root = importer = Path(inspect.stack()[1].filename).resolve()
+    else:
+        root = Path(root).resolve()
     while not (root / ".monorepo_root").exists():
         if root == root.parent:
             raise FileNotFoundError(
