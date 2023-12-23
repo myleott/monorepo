@@ -3,8 +3,9 @@ import os
 import sys
 from importlib import util
 from pathlib import Path
+import functools
 
-
+@functools.lru_cache(maxsize=512)
 def load_package(package, root:str = None):
     if not root:
         # Find `.monorepo_root` relative to the importing code.
@@ -27,5 +28,4 @@ def load_package(package, root:str = None):
     package = util.module_from_spec(spec)
     sys.modules[package_name] = package
     spec.loader.exec_module(package)
-
     return package
