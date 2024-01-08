@@ -7,7 +7,7 @@ with open("README.md") as f:
 
 setup(
     name="monorepo",
-    version="0.1.1",
+    version="0.1.2",
     description="Import packages from the root of a monorepo",
     url="https://github.com/myleott/monorepo",
     long_description = readme,
