@@ -4,11 +4,10 @@ import sys
 from importlib import util
 from pathlib import Path
 
-
-def load_package(package, root:str = None):
+def _find_root(root):
     if not root:
         # Find `.monorepo_root` relative to the importing code.
-        root = importer = Path(inspect.stack()[1].filename).resolve()
+        root = importer = Path(inspect.stack()[2].filename).resolve()
     else:
         root = Path(root).resolve()
     while not (root / ".monorepo_root").exists():
@@ -17,10 +16,13 @@ def load_package(package, root:str = None):
                 f"Couldn't find .monorepo_root in parents of {importer}"
             )
         root = root.parent
+    return str(root)
 
+def load_package(package, root:str = None, package_name = None):
+    root = _find_root(root)
     name_parts = package.split(".")
-    package_name = name_parts[-1]
-    package_dir = os.path.join(*([str(root)] + name_parts))
+    package_name = package_name or name_parts[-1]
+    package_dir = os.path.join(*([root] + name_parts))
     location = os.path.join(package_dir, "__init__.py")
 
     spec = util.spec_from_file_location(package_name, location)
@@ -29,3 +31,10 @@ def load_package(package, root:str = None):
     spec.loader.exec_module(package)
 
     return package
+
+def load_module(package, root:str = None):
+    root = _find_root(root)
+    if root not in sys.path:
+        sys.path.append(root)
+    import importlib
+    return importlib.import_module(package)
